@@ -31,11 +31,12 @@ atracacao_cols = [
 
 carga_cols = [
     'IDCarga', 'FlagTransporteViaInterioir', 'IDAtracacao', 'Percurso Transporte em vias Interiores',
-    'Origem', 'Percurso Transporte Interiores', 'Destino', 'STNaturezaCarga', 'CDMercadoria',
+    'Origem', 'Percurso Transporte Interiores', 'Destino', 'STNaturezaCarga', 'CDMercadoria', 
     'STSH2', 'Tipo Operação da Carga', 'STSH4', 'Carga Geral Acondicionamento', 'Natureza da Carga',
     'ConteinerEstado', 'Sentido', 'Tipo Navegação', 'TEU', 'FlagAutorizacao', 'QTCarga',
     'FlagCabotagem', 'VLPesoCargaBruta', 'FlagCabotagemMovimentacao', 'Ano da data de início da operação da atracação',
-    'FlagConteinerTamanho', 'Mês da data de início da operação da atracação'
+    'FlagConteinerTamanho', 'Mês da data de início da operação da atracação', 'FlagLongoCurso', 
+    'Porto Atracação', 'FlagMCOperacaoCarga', 'SGUF', 'FlagOffshore', 'Peso líquido da carga'
 ]
 
 def gerar_relatorio():

@@ -57,9 +57,6 @@ def captura_dados():
         print("Nenhum arquivo permitido encontrado na pasta 'reserva'.")
         return 0
 
-    # Cria a pasta 'landing' se não existir
-    os.makedirs(LANDING_PATH, exist_ok=True)
-
     # Move os arquivos da pasta 'reserva' para a pasta 'landing'
     for arquivo in arquivos_txt:
         origem = os.path.join(RESERVA_PATH, arquivo)
