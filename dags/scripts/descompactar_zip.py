@@ -9,7 +9,7 @@ RESERVA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__fi
 
 # Inicializa o SparkSession
 spark = SparkSession.builder \
-    .appName("Descompactar Zip") \
+    .appName("Descompactar zip") \
     .getOrCreate()
 
 def descompactar_zip(ano: int) -> None:

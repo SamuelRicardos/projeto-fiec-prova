@@ -16,7 +16,9 @@ ARQUIVOS_PERMITIDOS = {
 
 # Inicializa o SparkSession
 spark = SparkSession.builder \
-    .appName("Captura de Dados e Processamento com Spark") \
+    .appName("Captura de dados") \
+    .config("spark.network.timeout", "600s") \
+    .config("spark.executor.heartbeatInterval", "60s") \
     .getOrCreate()
 
 def processar_arquivo_com_spark(caminho_arquivo: str):
