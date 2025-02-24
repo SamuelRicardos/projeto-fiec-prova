@@ -18,14 +18,13 @@ dag = DAG(
     catchup=False
 )
 
-# send_email = TaskGroup("group_send_email", dag=dag)
 descompactacao = TaskGroup("group_descompactacao", dag=dag)
 group_database = TaskGroup('group_database', dag=dag)
 
 task_descompactar_arquivo_2021 = PythonOperator(
     task_id='descompactar_arquivo_2021',
     python_callable=descompactar_zip,
-    op_args=[2021],  # Passando o ano 2021 como argumento
+    op_args=[2021],
     task_group=descompactacao,
     dag=dag 
 )
@@ -33,7 +32,7 @@ task_descompactar_arquivo_2021 = PythonOperator(
 task_descompactar_arquivo_2022 = PythonOperator(
     task_id='descompactar_arquivo_2022',
     python_callable=descompactar_zip,
-    op_args=[2022],  # Passando o ano 2022 como argumento
+    op_args=[2022],
     task_group=descompactacao,
     dag=dag 
 )
@@ -41,7 +40,7 @@ task_descompactar_arquivo_2022 = PythonOperator(
 task_descompactar_arquivo_2023 = PythonOperator(
     task_id='descompactar_arquivo_2023',
     python_callable=descompactar_zip,
-    op_args=[2023],  # Passando o ano 2023 como argumento
+    op_args=[2023],
     task_group=descompactacao,
     dag=dag 
 )

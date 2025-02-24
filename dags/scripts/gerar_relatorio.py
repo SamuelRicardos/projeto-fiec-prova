@@ -6,7 +6,6 @@ BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../datalake
 def gerar_relatorio(**kwargs):
     trusted_dir = os.path.join(BASE_PATH, 'trusted')
     business_dir = os.path.join(BASE_PATH, 'business')
-    os.makedirs(business_dir, exist_ok=True)
     
     atracacao_cols = [
         'IDAtracacao', 'Tipo de Navegação da Atracação', 'CDTUP', 'Nacionalidade do Armador',
@@ -36,7 +35,7 @@ def gerar_relatorio(**kwargs):
         if arquivo.endswith('.parquet'):
             trusted_path = os.path.join(trusted_dir, arquivo)
 
-            print(f'🔍 Processando {arquivo}...')
+            print(f'Processando {arquivo}...')
 
             try:
                 df = pd.read_parquet(trusted_path, engine='pyarrow')
@@ -48,14 +47,14 @@ def gerar_relatorio(**kwargs):
                     df = df[[col for col in carga_cols if col in df.columns]]
                     dfs_carga.append(df)
                 else:
-                    print(f'⚠️ Estrutura desconhecida em {arquivo}, ignorando.')
+                    print(f'Estrutura desconhecida em {arquivo}, ignorando.')
                     continue
 
                 os.remove(trusted_path)
-                print(f'🗑️ {arquivo} removido da pasta "trusted".')
+                print(f'{arquivo} removido da pasta "trusted".')
 
             except Exception as e:
-                print(f'⚠️ Erro ao processar {arquivo}: {e}')
+                print(f'Erro ao processar {arquivo}: {e}')
 
     
     relatorio_data = {
@@ -63,15 +62,14 @@ def gerar_relatorio(**kwargs):
         'carga': [row.to_dict() for df in dfs_carga for _, row in df.iterrows()],
     }
 
-    # Retorne os dados para o XCom
     kwargs['ti'].xcom_push(key='relatorio_data', value=relatorio_data)
 
     if dfs_atracacao:
         df_atracacao_final = pd.concat(dfs_atracacao, ignore_index=True)
         df_atracacao_final.to_parquet(os.path.join(business_dir, 'atracacao.parquet'), index=False, engine='pyarrow')
-        print('✅ Arquivo consolidado "atracacao.parquet" salvo na camada business.')
+        print('Arquivo consolidado "atracacao.parquet" salvo na camada business.')
 
     if dfs_carga:
         df_carga_final = pd.concat(dfs_carga, ignore_index=True)
         df_carga_final.to_parquet(os.path.join(business_dir, 'carga.parquet'), index=False, engine='pyarrow')
-        print('✅ Arquivo consolidado "carga.parquet" salvo na camada business.')
+        print('Arquivo consolidado "carga.parquet" salvo na camada business.')
