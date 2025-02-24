@@ -17,7 +17,7 @@ def upload_to_s3(filename: str, key: str, bucket_name: str) -> None:
 dag = DAG(
     'atracacoes_e_cargas',
     start_date=datetime(2025, 2, 15),
-    schedule_interval=None,
+    schedule_interval='@montly',
     catchup=False
 )
 
