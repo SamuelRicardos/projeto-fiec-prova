@@ -1,0 +1,100 @@
+1) Auto avaliação
+Auto avalie suas habilidades nos requisitos de acordo com os níveis especificados.
+Qual o seu nível de domínio nas técnicas/ferramentas listadas abaixo, onde:
+● 0, 1, 2 - não tem conhecimento e experiência;
+● 3, 4 ,5 - conhece a técnica e tem pouca experiência;
+● 6 - domina a técnica e já desenvolveu vários projetos utilizando-a.
+
+Tópicos de Conhecimento:
+● Ferramentas de visualização de dados (Power BI, Qlik Sense e outros): 3
+● Manipulação e tratamento de dados com Python: 6
+● Manipulação e tratamento de dados com Pyspark: 2
+● Desenvolvimento de data workflows em Ambiente Azure com databricks: 1
+● Desenvolvimento de data workflows com Airflow: 6
+● Manipulação de bases de dados NoSQL: 2
+● Web crawling e web scraping para mineração de dados: 3
+● Construção de APIs: REST, SOAP e Microservices: 6
+
+2) Desenvolvimento de pipelines de ETL de dados com Python, Apache Airflow e Spark
+Foi solicitado à equipe de AI+Analytics do Observatório da Indústria/FIEC, um projeto
+envolvendo os dados do Anuário Estatísticos da ANTAQ (Agência Nacional de
+Transportes Aquáticos).O projeto consiste em uma análise pela equipe de cientistas de dados, bem como a
+disponibilização dos dados para o cliente que possui uma equipe de analistas própria
+que utiliza a ferramenta de BI (business intelligence) da Microsoft.Para isto, o nosso cientista de dados tem que entender a forma de apresentação dos
+dados pela ANTAQ e assim, fazer o ETL dos dados e os disponibilizar no nosso data
+lake para ser consumido pelo time de cientistas de dados, como também, elaborar
+uma forma de entregar os dados tratados ao time de analistas do cliente da melhor
+forma possível.
+
+a) Olhando para todos os dados disponíveis na fonte citada acima, em qual
+estrutura de dados você orienta guardá-los? Data Lake, SQL ou NoSQL?
+Discorra sobre sua orientação. (1 pts)
+
+Resposta: Em um Data Lake, porque é a forma mais adequada para se lidar com BigData e também pela ANTAQ consegui vários tipos de dados(brutos, semiestruturados, estruturados e não estruturados). Além disso, ao armazenar dados Parquet vai facilitar a leitura e a consulta dos dados pela equipe de analistas de dados.
+
+b) Nosso cliente estipulou que necessita de informações apenas sobre as
+atracações e cargas contidas nessas atracações dos últimos 3 anos (2021-
+2023). Logo, o time de especialistas de dados, em conjunto com você,
+analisaram e decidiram que os dados devem constar no data lake do
+observatório e em duas tabelas do SQL Server, uma para atracação e outra
+para carga.
+Assim, desenvolva script(s) em Python e Spark que extraia os dados do
+anuário, transforme-os e grave os dados tanto no data lake, quanto nas duas
+tabelas do SQL Server, sendo atracacao_fato e carga_fato, com as respectivas
+colunas abaixo. Os scripts de criação das tabelas devem constar no código
+final.
+Lembrando que os dados têm periodicidade mensal, então script’s
+automatizados e robustos ganham pontos extras. (2 pontos + 1 ponto para
+solução automatizada e elegante).
+
+Resposta: estão na pasta scripts dentro de dags, infelizmente não consegui conectar integrar o Airflow e o Docker ao SQL Server porque não identificava o banco de dados dentro do airflow mesmo indo em Connections, fazendo as instalações necessárias dentro do container. Um fato curioso é que eu testei a conexão em um arquivo python e dentro do Azure Database Studios e identificava a conexão, só na hora de executar a task dentro do workflow que não achava a conexão.
+
+c) Essas duas tabelas ficaram guardadas no nosso Banco SQL SERVER. Nossos
+economistas gostaram tanto dos dados novos que querem escrever uma
+publicação sobre eles. Mais especificamente sobre o tempo de espera dos
+navios para atracar. Mas eles não sabem consultar o nosso banco e apenas
+usam o Excel. Nesse caso, pediram a você para criar uma consulta (query)
+otimizada em sql em que eles vão rodar no excel e por isso precisa ter o menor
+número de linhas possível para não travar o programa. Eles
+querem uma tabela com dados do Ceará, Nordeste e Brasil contendo número
+de atracações, para cada localidade, bem como tempo de espera para atracar
+e tempo atracado por meses nos anos de 2021 e 2023. Segundo tabela abaixo:
+(2pts)
+
+Resposta:  Consulta SQL otimizada
+
+SELECT
+    Localidade,
+    COUNT(*) AS "Número de Atracações",
+    COALESCE(
+        COUNT(*) - 
+        (SELECT COUNT(*) 
+         FROM Atracacoes AS A2 
+         WHERE A2.Localidade = A.Localidade 
+         AND YEAR(A2.DataAtracacao) = YEAR(A.DataAtracacao) - 1 
+         AND MONTH(A2.DataAtracacao) = MONTH(A.DataAtracacao)),
+        0
+    ) AS "Variação do número de atracação em relação ao mesmo mês do ano anterior - Bônus",
+    AVG(TempoEspera) AS "Tempo de espera médio",  -- Substitua pelo nome correto da coluna de tempo de espera
+    AVG(TempoAtracado) AS "Tempo atracado médio",  -- Substitua pelo nome correto da coluna de tempo atracado
+    MONTH(DataAtracacao) AS "Mês",
+    YEAR(DataAtracacao) AS "Ano"
+FROM Atracacoes AS A
+WHERE Localidade IN ('Ceará', 'Nordeste', 'Brasil') 
+  AND YEAR(DataAtracacao) IN (2021, 2023)
+GROUP BY YEAR(DataAtracacao), MONTH(DataAtracacao), Localidade
+ORDER BY Localidade, Ano, Mes;
+
+3) Criação de ambiente de desenvolvimento com Linux e Docker.
+Finalmente, este processo deverá ser automatizado usando a ferramenta de orquestração de
+workflow Apache Airflow + Docker. Escreva uma DAG para a base ANTAQ levando em conta
+as características e etapas de ETL para esta base de dados considerando os repositórios de
+data lake e banco de dados. Esta também podperá conter operadores para enviar avisos por
+e-mail, realizar checagens quando necessário (e.g.: caso os dados não sejam encontrados,
+quando o processo for finalizado, etc). Todos os passos do processo ETL devem ser listados
+como tasks e orquestrados de forma otimizada. (3 pts + 1 pts)
+
+Resposta: Esse projeto hospedado no repositório foi desenvolvido utilizando Airflow e Docker em conjunto com o Astro. Ele executa processos de ETL e simula um Data Lake, organizando os dados nas camadas landing, raw, trusted e business. Na pasta scripts o processo começa com o descompactar_zip.py que é responsável por descompactar arquivos que são baixados dos urls dos hrefs do site da ANTAQ e jogar para a pasta data. Ele prepara os dados para serem processados posteriormente. Depois disso o coleta_dados.py pega os arquivos .txt da pasta data e depois utiliza o Apache Spark para processar os dados, valida a estrutura dos arquivos e os move para a camada landing no Data Lake, onde são armazenados para processamento posterior. A próxima etapa do processo é o processamento.py, esse script realiza a transformação dos dados, lê os arquivos de texto na camada landing, ajusta colunas com tipos problemáticos (como a conversão de colunas específicas para str), e em seguida converte os dados para o formato Parquet, movendo para a camada raw do Data Lake e no final, os arquivos de texto originais são removidos da pasta landing. Em seguida, limpeza_dados.py é responsável por limpar e validar os dados, removendo duplicatas e valores nulos utilizando Spark para processamento em larga escala. Os dados são, então, armazenados na camada trusted, prontos para serem consumidos nas etapas posteriores do pipeline.Na etapa de geração do relatório, o arquivo gerar_relatorio.py é responsável por consolidar e salvar os dados processados na camada business. Ele busca arquivos Parquet na camada trusted e os organiza conforme os requisitos de colunas específicas para as tabelas de atracação e carga. O código identifica as colunas necessárias para cada tipo de dado, filtra as informações relevantes, e cria dois DataFrames: um para os dados de atracação e outro para os dados de carga. Após a manipulação, os dados são salvos como arquivos Parquet na pasta business e os arquivos originais são removidos da pasta trusted. Esse processo gera os relatórios consolidados, como atracacao.parquet e carga.parquet, prontos para análises mais aprofundadas.
+
+Observação: por algum motivo estavam vindo colunas faltando dentro do arquivo .txt e por isso no desenvolvimento do código não coloquei todas as colunas. Eu tentei executar o web scraping com o Beautiful Soup 4 no ínicio para fazer a procura dos zips e a descompactação mas a instalação dele dentro do container não foi reconhecida pelo airflow. Infelizmente, tive várias complicações com integrações dentro do docker e do airflow, principalmente com o Driver ODBC o que não permitiu fazer a ligação com SQL Server, mesmo eu colocando em Conections configurado e verificando dentro do container se ele estava lá. Tentei salvar as configurações de SMTP dentro bashrc mas toda vez que eu reiniciava o meu container as configurações eram apagadas e não consegui fazer as tasks de enviar email quando a dag de geração de relatório desse sucess ou failed. Porque eu utilizei o Astro? Porque sem ele não consegui usar o Pyspark, mesmo tendo o Java instalado na minha máquina e dentro do container não era identificado e não conseguia executar a dag.
+
